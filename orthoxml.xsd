@@ -233,8 +233,10 @@
 			</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
-			<xs:element name="orthologGroup" type="ortho:group" maxOccurs="unbounded" />
-			<xs:element name="paralogGroup" type="ortho:group" maxOccurs="unbounded" />
+			<xs:choice minOccurs="1" maxOccurs="unbounded">
+				<xs:element name="orthologGroup" type="ortho:group" maxOccurs="unbounded" />
+				<xs:element name="paralogGroup" type="ortho:group" maxOccurs="unbounded" />
+			</xs:choice>
 		</xs:sequence>
 	</xs:complexType>
 	<!-- Group .................................................................................................. -->
