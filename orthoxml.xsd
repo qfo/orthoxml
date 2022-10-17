@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:ortho="http://orthoXML.org/2011/" version="0.3" targetNamespace="http://orthoXML.org/2011/" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+<xs:schema xmlns:ortho="http://orthoXML.org/2011/" version="0.4" targetNamespace="http://orthoXML.org/2011/" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 	<xs:annotation>
 		<xs:appinfo>OrthoXML Schema</xs:appinfo>
 		<xs:documentation>
-			This Schema defines the OrthoXML version 0.3.
+			This Schema defines the OrthoXML version 0.4.
 			Author(s): Sanjit Roopra, Dave Messina, Fabian Schreiber, Thomas Schmitt, and Erik Sonnhammer.
 			SBC - Stockholm Bioinformatics Centre. 2011. More info at http://orthoxml.org
 		</xs:documentation>
@@ -227,14 +227,14 @@
 	<xs:complexType name="groups">
 		<xs:annotation>
 			<xs:documentation>
-				Represents the list of ortholog groups. Note that
-				the purpose of OrthoXML is to store orthology assignment hence on
-				the top level only ortholog groups are allowed.
+				Represents the list of ortholog groups. Normally 
+				the top level is an ortholog group, but in order to express
+				a duplication at the root, a paralog group may also be the top level.
 			</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
-			<xs:element name="orthologGroup" type="ortho:group"
-				maxOccurs="unbounded" />
+			<xs:element name="orthologGroup" type="ortho:group" maxOccurs="unbounded" />
+			<xs:element name="paralogGroup" type="ortho:group" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 	<!-- Group .................................................................................................. -->
