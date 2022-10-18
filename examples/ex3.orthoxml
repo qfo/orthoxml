@@ -1,4 +1,4 @@
-?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <orthoXML xmlns="http://orthoXML.org/2011/" version="0.4" origin="orthoXML.org" originVersion="1">
   <species name="Homo sapiens" NCBITaxId="9606">
     <database name="someDB" version="42">
