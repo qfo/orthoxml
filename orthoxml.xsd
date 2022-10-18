@@ -237,7 +237,7 @@
 			<xs:documentation>
 				The taxonomy of the species analysed in this orthoxml file. Either you specify
 				the taxonomy as a nested grouping of taxon elements, or link to the ncbi taxonomy
-				by 
+				by defining an ncbitaxonomy element within the taxonomy element.
 			</xs:documentation>
 		</xs:annotation>
 		<xs:choice maxOccurs="1">
