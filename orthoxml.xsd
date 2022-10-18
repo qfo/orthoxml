@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:ortho="http://orthoXML.org/2011/" version="0.4" targetNamespace="http://orthoXML.org/2011/" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+<xs:schema xmlns:ortho="http://orthoXML.org/2011/" version="0.5rc1" targetNamespace="http://orthoXML.org/2011/" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 	<xs:annotation>
 		<xs:appinfo>OrthoXML Schema</xs:appinfo>
 		<xs:documentation>
-			This Schema defines the OrthoXML version 0.4.
+			This Schema defines the OrthoXML version 0.5rc1.
 			Author(s): Sanjit Roopra, Dave Messina, Fabian Schreiber, Thomas Schmitt, and Erik Sonnhammer.
 			SBC - Stockholm Bioinformatics Centre. 2011. More info at http://orthoxml.org
 		</xs:documentation>
@@ -20,6 +20,7 @@
 				<xs:element minOccurs="0" name="notes" type="ortho:notes" />
 				<xs:element minOccurs="1" maxOccurs="unbounded" name="species"
 					type="ortho:species" />
+				<xs:element minOccurs="0" name="taxonomy" type="ortho:taxonomy" />
 				<xs:element name="scores" type="ortho:scores" minOccurs="0"/>
 				<xs:element name="groups" type="ortho:groups" />
 			</xs:sequence>
@@ -55,12 +56,20 @@
 			<xs:selector xpath="ortho:scores/ortho:scoreDef" />
 			<xs:field xpath="@id" />
 		</xs:key>
+		<xs:key name="taxonidKey">
+			<xs:selector xpath=".//ortho:taxon" />
+			<xs:field xpath="@id" />
+		</xs:key>
 		<xs:keyref name="geneidRef" refer="ortho:geneidKey">
 			<xs:selector xpath=".//ortho:geneRef" />
 			<xs:field xpath="@id" />
 		</xs:keyref>
 		<xs:keyref name="scoreidRef" refer="ortho:scoreidKey">
 			<xs:selector xpath=".//ortho:score" />
+			<xs:field xpath="@id" />
+		</xs:keyref>
+		<xs:keyref name="taxonidRef" refer="ortho:taxonidKey">
+			<xs:selector xpath=".//ortho:taxon" />
 			<xs:field xpath="@id" />
 		</xs:keyref>
 		<xs:unique name="uniqueGroupId">
@@ -81,7 +90,7 @@
 				name="database" />
 			<xs:element minOccurs="0" type="ortho:notes" name="notes" />
 		</xs:sequence>
-		<xs:attribute name="NCBITaxId" use="required" type="xs:integer">
+		<xs:attribute name="NCBITaxId" type="xs:integer">
 			<xs:annotation>
 				<xs:documentation>
 					The NCBI Taxonomy identifier of the species to
@@ -90,11 +99,21 @@
 			</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="taxonId" type="xs:integer">
+			<xs:annotation>
+				<xs:documentation>
+					The internal taxonomy identifier of the species to
+					identify it unambiguously. Must match the id attributes of 
+					the leaf taxon nodes in the taxonomy element.
+			</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+
 		<xs:attribute name="name" use="required">
 			<xs:annotation>
 				<xs:documentation>
 					The name of the species.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -117,14 +136,14 @@
 					concatenation with the gene identifier links to the website of the
 					gene in the source database. However, how this is used depends on
 					the source of the orthoXML file.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="name" use="required" type="xs:string">
 			<xs:annotation>
 				<xs:documentation>
 					Name of the database.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="protLink" type="xs:anyURI">
@@ -132,7 +151,7 @@
 				<xs:documentation>
 					A Uniform Resource Identifier (URI) pointing to
 					the protein.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="transcriptLink" type="xs:anyURI">
@@ -140,14 +159,14 @@
 				<xs:documentation>
 					A Uniform Resource Identifier (URI) pointing to
 					the transcript.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="version" use="required">
 			<xs:annotation>
 				<xs:documentation>
 					Version number of the database.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -187,14 +206,14 @@
 					Identifier of the gene in the source database.
 					Multiple splice forms are possible by having the same geneId more
 					than once.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="id" use="required" type="xs:integer">
 			<xs:annotation>
 				<xs:documentation>
 					Internal identifier to link to the gene via the geneRef elements.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="protId" type="xs:string">
@@ -208,7 +227,68 @@
 			<xs:annotation>
 				<xs:documentation>
 					Identifier of the transcript in the source database.
-         		</xs:documentation>
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- Taxonomy ............................................................................................... -->
+	<xs:complexType name="taxonomy">
+		<xs:annotation>
+			<xs:documentation>
+				The taxonomy of the species analysed in this orthoxml file. Either you specify
+				the taxonomy as a nested grouping of taxon elements, or link to the ncbi taxonomy
+				by 
+			</xs:documentation>
+		</xs:annotation>
+		<xs:choice maxOccurs="1">
+			<xs:element name="taxon" type="ortho:taxonDef" />
+			<xs:element name="ncbitaxonomy" type="ortho:ncbiDef" />
+		</xs:choice>
+	</xs:complexType>
+	<!-- Taxon Def............................................................................................... -->
+	<xs:complexType name="taxonDef">
+		<xs:annotation>
+			<xs:documentation>
+				A node in the taxonomy, identifying a clade of species
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="taxon" type="ortho:taxonDef" />
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:integer" use="required">
+			<xs:annotation>
+				<xs:documentation>
+					(Internal) identifier of the clade / taxon.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="name" type="xs:string">
+			<xs:annotation>
+				<xs:documentation>
+					Name of the clade / taxon.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- NCBI Def............................................................................................... -->
+	<xs:complexType name="ncbiDef">
+		<xs:annotation>
+			<xs:documentation>
+				crosslink to the ncbi taxonomy
+			</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="link" type="xs:anyURI">
+			<xs:annotation>
+				<xs:documentation>
+					A link to the used ncbi taxonomy.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="version" type="xs:string">
+			<xs:annotation>
+				<xs:documentation>
+					The version of the ncbi taxonomy that is used.
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -278,6 +358,16 @@
 			</xs:documentation>
 		</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="taxonId" type="xs:integer">
+		<xs:annotation>
+			<xs:documentation>
+				Taxonomy identifier that defines the speciation event of reference for this 
+				group. The taxonId references either a node in the defined taxonomy structure
+				(where the nummeric IDs can be defined as needed) or it should be the taxonomy
+				identifier in the NCBI taxonomy. 
+			</xs:documentation>
+		</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 	<!-- GeneRef ................................................................................................. -->
 	<xs:complexType name="geneRef">
@@ -300,7 +390,7 @@
 			<xs:annotation>
 				<xs:documentation>
 					Internal identifier for a gene element defined under the species element.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -321,14 +411,14 @@
 				<xs:documentation>
 					An internal identifier to link to the
 					scoreDef from a score element.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="desc" use="required">
 			<xs:annotation>
 				<xs:documentation>
 					Description of the score.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -347,7 +437,7 @@
 				<xs:documentation>
 					An identifier linking to the scoreDef element,
 					which defines the score.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="value" use="required" type="xs:decimal">
@@ -355,7 +445,7 @@
 				<xs:documentation>
 					The actual value of the score. For instance a
 					confidence score of a group member.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -371,7 +461,7 @@
 			<xs:annotation>
 				<xs:documentation>
 					The key of the key-value annotation pair.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="value">
@@ -379,7 +469,7 @@
 				<xs:documentation>
 					The value of the key-value annotation pair. Optional
 					to allow flag like annotations.
-         		</xs:documentation>
+				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
